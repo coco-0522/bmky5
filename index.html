@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Y6 BMK APR EJAAN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #FFF5F6;
+            min-height: 100vh;
+            font-family: 'ZCOOL KuaiLe', cursive;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        .word-box {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+            font-size: 1rem;
+            min-width: fit-content;
+            padding: 0.6rem 0.8rem;
+            margin: 0.2rem;
+            user-select: none;
+            -webkit-user-select: none;
+            border-radius: 8px;
+        }
+        .word-box:hover {
+            transform: translateY(-2px);
+        }
+        .word-box.shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .answer-box {
+            background: url('https://ai-public.mastergo.com/ai/img_res/b15b68af32da0735e74e53041465e218.jpg') center/cover;
+            min-height: 120px;
+            width: 95%;
+            margin: 0 auto;
+            border-radius: 12px;
+        }
+        .chinese-hint-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 95%;
+            margin: 1rem auto;
+        }
+        .chinese-hint {
+            font-size: 1.4rem;
+            color: #333;
+            text-align: center;
+            padding: 0.8rem;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            line-height: 1.4;
+            font-weight: bold;
+            flex-grow: 1;
+        }
+        .speaker-btn {
+            background-color: #92B4EC;
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .speaker-btn:hover {
+            transform: scale(1.1);
+        }
+        #answer-slot {
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 6px;
+        }
+        .timer-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #EF476F;
+            margin: 0.5rem 0;
+        }
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 100;
+            background-color: rgba(255,255,255,0.8);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            touch-action: manipulation;
+        }
+        .restart-btn {
+            background-color: #EF476F;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 15px;
+            display: none;
+            font-size: 0.9rem;
+            border: none;
+        }
+        .group-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            border: none;
+            margin: 0.2rem;
+        }
+        .group-1 { background-color: #A7C7E7; }
+        .group-2 { background-color: #FFB6C1; }
+        .group-3 { background-color: #A7E8E8; }
+        .group-4 { background-color: #C8A2C8; }
+        
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+        .modal-input {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 1rem 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        .modal-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0.5rem;
+            border: none;
+            transition: all 0.2s;
+            background-color: #06D6A0;
+            color: white;
+        }
+        .modal-btn:hover {
+            background-color: #04b586;
+        }
+        .completion-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .completion-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        @media (max-width: 640px) {
+            .word-box {
+                font-size: 0.9rem;
+                padding: 0.5rem 0.7rem;
+            }
+            .chinese-hint {
+                font-size: 1.2rem;
+                padding: 0.6rem;
+            }
+            .speaker-btn {
+                width: 35px;
+                height: 35px;
+            }
+            h1 {
+                font-size: 1.8rem !important;
+            }
+            .answer-box {
+                min-height: 130px;
+            }
+            .timer-display {
+                font-size: 1.1rem;
+            }
+            .music-control {
+                bottom: 15px;
+                left: 15px;
+                width: 40px;
+                height: 40px;
+            }
+            .restart-btn {
+                padding: 7px 14px;
+                font-size: 0.85rem;
+            }
+        }
+        
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between p-4">
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">请输入您的名字</h2>
+            <input type="text" id="playerName" class="modal-input" placeholder="您的名字" required>
+            <div class="flex justify-center">
+                <button id="startGameBtn" class="modal-btn">开始游戏</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completion Modal -->
+    <div id="completionModal" class="completion-modal">
+        <div class="completion-content">
+            <h2 class="text-2xl font-bold text-primary mb-3">恭喜完成所有句子！</h2>
+            <p class="text-lg text-gray-600 mb-4">您已经完成了本组的所有练习</p>
+            <button class="modal-btn" onclick="location.reload()">
+                返回首页
+            </button>
+        </div>
+    </div>
+
+    <!-- Audio elements -->
+    <audio id="bgMusic" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-ominous-drums-227.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="successSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="errorSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-software-interface-remove-2578.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="timeoutSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="chineseSound"></audio>
+
+    <div class="music-control" id="musicToggle">
+        <i class="fas fa-volume-up text-lg"></i>
+    </div>
+
+    <div class="relative w-full max-w-6xl text-center mb-4">
+        <h1 class="text-3xl font-bold text-primary mb-2 mt-4">Y6 BMK APR EJAAN</h1>
+        <p class="text-base text-gray-600">拖动马来词语组成完整的句子吧！</p>
+    </div>
+
+    <div class="flex flex-wrap justify-center mb-4 w-full">
+        <button id="group1-btn" class="group-btn group-1" onclick="selectGroup(0)">8-14/4</button>
+        <button id="group2-btn" class="group-btn group-2" onclick="selectGroup(1)">15-21/4</button>
+        <button id="group3-btn" class="group-btn group-3" onclick="selectGroup(2)">22-28/4</button>
+        <button id="group4-btn" class="group-btn group-4" onclick="selectGroup(3)">1-7/5</button>
+    </div>
+
+    <div class="timer-display" id="timer">剩余时间: 60秒</div>
+
+    <div id="game-container" class="w-full flex-grow flex flex-col items-center justify-start gap-3 mb-4">
+        <div class="chinese-hint-container">
+            <div id="chinese-hint" class="chinese-hint"></div>
+            <div class="speaker-btn" id="speakerBtn">
+                <i class="fas fa-volume-up"></i>
+            </div>
+        </div>
+        
+        <div id="words-container" class="w-full flex flex-wrap justify-center gap-1 mb-3 px-2"></div>
+
+        <div class="answer-box rounded-2xl flex items-center justify-center p-3 relative">
+            <div id="answer-slot" class="w-full h-full flex items-center justify-center gap-1 bg-white/50 rounded-xl p-2"></div>
+        </div>
+        
+        <button id="restartBtn" class="restart-btn">
+            <i class="fas fa-redo mr-2"></i>重新开始游戏
+        </button>
+    </div>
+
+    <div class="flex gap-3 mb-4 w-full justify-center">
+        <button id="prev-btn" class="group-btn group-1">
+            <i class="fas fa-arrow-left mr-2"></i>上一句
+        </button>
+        <button id="next-btn" class="group-btn group-3">
+            下一句<i class="fas fa-arrow-right ml-2"></i>
+        </button>
+    </div>
+
+    <div id="success-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold text-primary mb-2">你太棒啦！</h2>
+            <p class="text-base text-gray-600 mb-3" id="success-message">成功完成了这个句子！</p>
+            <button class="modal-btn" onclick="closeModalAndContinue()">
+                继续
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game data
+        const sentenceGroups = [
+            // Group 1: 8-14/4 (Light Blue)
+            [
+                {chinese: "上周四,我走路回家", malay: ['Pada', 'hari', 'Khamis', 'yang', 'lalu,', 'saya', 'berjalan', 'kaki', 'pulang', 'ke', 'rumah.']},
+                {chinese: "那天天气非常炎热", malay: ['Cuaca', 'pada', 'hari', 'itu', 'panas', 'terik.']},
+                {chinese: "在路上,我突然看到滚滚浓烟", malay: ['Dalam', 'perjalanan,', 'saya', 'ternampak', 'asap', 'berkepul-kepul.']},
+                {chinese: "我立刻朝着黑烟的方向跑去", malay: ['Saya', 'segera', 'berlari', 'menuju', 'ke', 'arah', 'asap', 'hitam', 'itu.']}
+            ],
+            // Group 2: 15-21/4 (Light Pink)
+            [
+                {chinese: "原来,阿里先生的房子起火了", malay: ['Rupa-rupanya', 'rumah', 'Encik', 'Ali', 'terbakar.']},
+                {chinese: "我立即联系了消防队和警察", malay: ['Saya', 'segera', 'menghubungi', 'pihak', 'bomba', 'dan', 'pihak', 'polis.']},
+                {chinese: "之后,我急忙呼喊邻居们来帮忙", malay: ['Selepas', 'itu,', 'saya', 'segera', 'menjerit', 'untuk', 'meminta', 'bantuan', 'daripada', 'jiran-jiran.']},
+                {chinese: "我们分工合作,抢救贵重物品并努力扑灭火势", malay: ['Kami', 'bekerjasama', 'bagai', 'aur', 'dengan', 'tebing', 'mengangkat', 'barang', 'yang', 'bernilai', 'dan', 'memadamkan', 'api.']}
+            ],
+            // Group 3: 22-28/4 (Light Cyan)
+            [
+                {chinese: "不久,警察和消防队员到达现场", malay: ['Tidak', 'lama', 'kemudian,', 'pihak', 'polis', 'dan', 'bomba', 'tiba', 'di', 'tempat', 'kejadian.']},
+                {chinese: "消防队员们分力合作,奋力灭火", malay: ['Pihak', 'bomba', 'bekerjasama', 'memadamkan', 'api', 'yang', 'marak.']},
+                {chinese: "接着,警方调查了发生火灾的原因", malay: ['Selain', 'itu,', 'pihak', 'polis', 'menyiasat', 'punca', 'kebakaran', 'berlaku.']},
+                {chinese: "他们还表扬了我展现出的勇气", malay: ['Pihak', 'polis', 'juga', 'memuji', 'saya', 'atas', 'keberanian', 'saya.']}
+            ],
+            // Group 4: 1-7/5 (Light Purple)
+            [
+                {chinese: "之后,我继续回家的路程", malay: ['Selepas', 'itu,', 'saya', 'meneruskan', 'perjalanan', 'pulang', 'ke', 'rumah.']},
+                {chinese: "我感到高兴,因为没有生命损失", malay: ['Saya', 'berasa', 'gembira', 'kerana', 'tiada', 'nyawa', 'terkorban.']},
+                {chinese: "因此,我们应时刻注意个人安全,因为灾难总是无声无息地来临", malay: ['Oleh', 'itu,', 'kita', 'haruslah', 'menjaga', 'keselamatan', 'diri', 'dari', 'masa', 'ke', 'masa', 'kerana', 'malang', 'tidak', 'berbau.']}
+            ]
+        ];
+        
+        // Game state
+        let currentGroup = 0;
+        let currentSentence = 0;
+        let selectedWords = [];
+        let timer;
+        let timeLeft = 60;
+        let isGameActive = false;
+        let isMusicPlaying = false;
+        let completedSentences = [];
+        
+        // Player stats
+        let playerName = '';
+        let correctAnswers = 0;
+        let totalAttempts = 0;
+        let gameStartTime = null;
+        let currentSessionStartTime = null;
+        
+        // Google Sheets URL
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxEBSdmGS2idna3HlPe-MurCkuY6PPw7zZymsNjg1_NIwwu1DAfDtClyk2XkOTY6G6L/exec';
+        
+        // Audio elements
+        const bgMusic = document.getElementById('bgMusic');
+        const successSound = document.getElementById('successSound');
+        const errorSound = document.getElementById('errorSound');
+        const timeoutSound = document.getElementById('timeoutSound');
+        const chineseSound = document.getElementById('chineseSound');
+        
+        // Initialize audio settings
+        function initAudio() {
+            bgMusic.volume = 0.3;
+            successSound.volume = 0.3;
+            errorSound.volume = 0.3;
+            timeoutSound.volume = 0.3;
+            chineseSound.volume = 0.8;
+            tryPlayBackgroundMusic();
+        }
+        
+        function tryPlayBackgroundMusic() {
+            bgMusic.play().then(() => {
+                isMusicPlaying = true;
+                updateMusicIcon();
+            }).catch(error => {
+                console.log("Autoplay prevented");
+            });
+        }
+        
+        function toggleMusic() {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+            } else {
+                bgMusic.play();
+            }
+            isMusicPlaying = !isMusicPlaying;
+            updateMusicIcon();
+        }
+        
+        function updateMusicIcon() {
+            const icon = document.querySelector('#musicToggle i');
+            icon.className = isMusicPlaying ? 'fas fa-volume-up text-lg' : 'fas fa-volume-mute text-lg';
+        }
+        
+        function playChinesePronunciation() {
+            const chineseText = sentenceGroups[currentGroup][currentSentence].chinese;
+            if (window.speechSynthesis) {
+                const utterance = new SpeechSynthesisUtterance(chineseText);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.9;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+        
+        function playSuccessSound() {
+            successSound.currentTime = 0;
+            successSound.play();
+        }
+        
+        function playErrorSound() {
+            errorSound.currentTime = 0;
+            errorSound.play();
+        }
+        
+        function playTimeoutSound() {
+            timeoutSound.currentTime = 0;
+            timeoutSound.play();
+        }
+        
+        function pronounceWord(word) {
+            if (window.speechSynthesis) {
+                const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+                const utterance = new SpeechSynthesisUtterance(cleanWord);
+                utterance.lang = 'ms-MY';
+                utterance.rate = 0.9;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+        
+        function loadSentence() {
+            clearInterval(timer);
+            timeLeft = 60;
+            updateTimerDisplay();
+            
+            const chineseHint = document.getElementById('chinese-hint');
+            const wordsContainer = document.getElementById('words-container');
+            const answerSlot = document.getElementById('answer-slot');
+            const restartBtn = document.getElementById('restartBtn');
+            
+            chineseHint.textContent = sentenceGroups[currentGroup][currentSentence].chinese;
+            wordsContainer.innerHTML = '';
+            answerSlot.innerHTML = '';
+            selectedWords = [];
+            restartBtn.style.display = 'none';
+            
+            const colors = ['#FFB3B3', '#BAFCA2', '#98E4FF', '#FFE5A5'];
+            const words = shuffle([...sentenceGroups[currentGroup][currentSentence].malay]);
+            
+            words.forEach((word, index) => {
+                const wordBox = document.createElement('div');
+                wordBox.className = 'word-box rounded-xl font-bold flex items-center justify-center';
+                wordBox.style.backgroundColor = colors[index % colors.length];
+                wordBox.textContent = word;
+                wordBox.draggable = true;
+                
+                wordBox.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    pronounceWord(word);
+                    selectWord(wordBox);
+                });
+                
+                wordBox.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                    pronounceWord(word);
+                    selectWord(wordBox);
+                }, {passive: true});
+                
+                wordBox.addEventListener('dragstart', (e) => {
+                    selectWord(wordBox);
+                });
+                
+                wordsContainer.appendChild(wordBox);
+            });
+            
+            isGameActive = true;
+            currentSessionStartTime = Date.now();
+            startTimer();
+        }
+        
+        function selectWord(wordBox) {
+            if (!isGameActive) return;
+            
+            if (wordBox.parentElement.id === 'words-container') {
+                const answerSlot = document.getElementById('answer-slot');
+                answerSlot.appendChild(wordBox);
+                selectedWords.push(wordBox.textContent);
+                
+                if (selectedWords.length === sentenceGroups[currentGroup][currentSentence].malay.length) {
+                    checkAnswer();
+                }
+            } else {
+                const wordsContainer = document.getElementById('words-container');
+                wordsContainer.appendChild(wordBox);
+                selectedWords = selectedWords.filter(w => w !== wordBox.textContent);
+            }
+        }
+        
+        function checkAnswer() {
+            clearInterval(timer);
+            isGameActive = false;
+            totalAttempts++;
+            
+            const correct = selectedWords.join(' ') === sentenceGroups[currentGroup][currentSentence].malay.join(' ');
+            if (correct) {
+                correctAnswers++;
+                completedSentences.push(currentSentence);
+                document.getElementById('success-message').textContent = "成功完成了这个句子！";
+                document.getElementById('success-modal').style.display = 'flex';
+                playSuccessSound();
+                
+                // Check if all sentences in this group are completed
+                if (completedSentences.length === sentenceGroups[currentGroup].length) {
+                    setTimeout(showCompletionModal, 1500);
+                } else {
+                    setTimeout(closeModalAndContinue, 1500);
+                }
+            } else {
+                const answerSlot = document.getElementById('answer-slot');
+                Array.from(answerSlot.children).forEach(box => {
+                    box.classList.add('shake');
+                    setTimeout(() => box.classList.remove('shake'), 500);
+                });
+                
+                playErrorSound();
+                
+                setTimeout(() => {
+                    const wordsContainer = document.getElementById('words-container');
+                    while (answerSlot.firstChild) {
+                        wordsContainer.appendChild(answerSlot.firstChild);
+                    }
+                    selectedWords = [];
+                    isGameActive = true;
+                    startTimer();
+                }, 1000);
+            }
+        }
+        
+        function showCompletionModal() {
+            document.getElementById('success-modal').style.display = 'none';
+            document.getElementById('completionModal').style.display = 'flex';
+            savePlayerStats(true, true);
+        }
+        
+        function startTimer() {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    isGameActive = false;
+                    playTimeoutSound();
+                    showRestartButton();
+                    savePlayerStats(false, false);
+                }
+            }, 1000);
+        }
+        
+        function showRestartButton() {
+            const restartBtn = document.getElementById('restartBtn');
+            restartBtn.style.display = 'block';
+            restartBtn.onclick = resetGame;
+        }
+        
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = `剩余时间: ${timeLeft}秒`;
+            
+            if (timeLeft <= 10) {
+                timerElement.style.color = '#FF0000';
+                timerElement.style.animation = 'pulse 0.5s infinite alternate';
+            } else {
+                timerElement.style.color = '#EF476F';
+                timerElement.style.animation = 'none';
+            }
+        }
+        
+        function closeModalAndContinue() {
+            document.getElementById('success-modal').style.display = 'none';
+            savePlayerStats(true, false);
+            nextSentence();
+        }
+        
+        function nextSentence() {
+            // Find next uncompleted sentence
+            let nextSentenceIndex = -1;
+            for (let i = 0; i < sentenceGroups[currentGroup].length; i++) {
+                if (!completedSentences.includes(i)) {
+                    nextSentenceIndex = i;
+                    break;
+                }
+            }
+            
+            if (nextSentenceIndex !== -1) {
+                currentSentence = nextSentenceIndex;
+                loadSentence();
+            } else {
+                showCompletionModal();
+            }
+        }
+        
+        function resetGame() {
+            const restartBtn = document.getElementById('restartBtn');
+            restartBtn.style.display = 'none';
+            loadSentence();
+        }
+        
+        function selectGroup(groupIndex) {
+            currentGroup = groupIndex;
+            currentSentence = 0;
+            completedSentences = [];
+            loadSentence();
+        }
+        
+        function savePlayerStats(isSuccess, isCompletion) {
+            if (!playerName) return;
+            
+            const playDuration = Math.floor((Date.now() - currentSessionStartTime) / 1000);
+            const accuracy = totalAttempts > 0 ? Math.round((correctAnswers / totalAttempts) * 100) : 0;
+            
+            const data = {
+                name: playerName,
+                timestamp: new Date().toISOString(),
+                playCount: totalAttempts,
+                correctAnswers: correctAnswers,
+                accuracy: accuracy,
+                duration: playDuration,
+                success: isSuccess,
+                group: currentGroup + 1,
+                sentence: currentSentence + 1,
+                isCompletion: isCompletion
+            };
+            
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            }).catch(error => {
+                console.error('Error saving stats:', error);
+            });
+        }
+        
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        function startGame() {
+            playerName = document.getElementById('playerName').value.trim();
+            if (!playerName) {
+                alert('请输入您的名字');
+                return;
+            }
+            
+            document.getElementById('loginModal').style.display = 'none';
+            gameStartTime = Date.now();
+            correctAnswers = 0;
+            totalAttempts = 0;
+            completedSentences = [];
+            initGame();
+        }
+        
+        function initGame() {
+            document.getElementById('prev-btn').addEventListener('click', () => {
+                if (!isGameActive) return;
+                currentSentence = (currentSentence - 1 + sentenceGroups[currentGroup].length) % sentenceGroups[currentGroup].length;
+                loadSentence();
+            });
+            
+            document.getElementById('next-btn').addEventListener('click', () => {
+                if (!isGameActive) return;
+                nextSentence();
+            });
+            
+            document.getElementById('musicToggle').addEventListener('click', toggleMusic);
+            document.getElementById('speakerBtn').addEventListener('click', playChinesePronunciation);
+            document.getElementById('chinese-hint').addEventListener('click', playChinesePronunciation);
+            document.getElementById('restartBtn').addEventListener('click', resetGame);
+            
+            initAudio();
+            selectGroup(0);
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('startGameBtn').addEventListener('click', startGame);
+            document.getElementById('playerName').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    startGame();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
